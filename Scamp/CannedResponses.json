@@ -30,13 +30,13 @@
     "TeamOnly": false
   },
   {
-    "Aliases": [ "beep" ],
-    "CannedResponseText": "beep-beep-boop",
+    "Aliases": [ "*beep*boop*" ],
+    "CannedResponseText": "beep-boop-beep",
     "TeamOnly": false
   },
   {
     "Aliases": [ "boop*" ],
-    "CannedResponseText": "beep-beep-boop",
+    "CannedResponseText": "boop-boop-boop",
     "TeamOnly": false
   }
 ]

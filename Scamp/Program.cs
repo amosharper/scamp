@@ -114,8 +114,8 @@ namespace Scamp
                     foreach (var triggerString in triggerAliases)
                     {
                         var regexPreString = triggerString.Replace("*", "(.*)");
-                        var regexString = $@"{regexPreString}";
-                        triggerRegexes.Add(new Regex(regexString, RegexOptions.IgnoreCase | RegexOptions.Multiline));
+                        var regexString = $@"^{regexPreString}$";
+                        triggerRegexes.Add(new Regex(regexString, RegexOptions.IgnoreCase | RegexOptions.Singleline));
                     }
 
                     // Update the canned response object with the two new lists
