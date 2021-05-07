@@ -9,6 +9,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Diagnostics;
 
 namespace Scamp
 {
@@ -16,29 +17,28 @@ namespace Scamp
     {
         static void Main(string[] args) => new Program().RunBot().GetAwaiter().GetResult();
 
-        public static DiscordSocketClient _client;
+        public static DiscordSocketClient client;
         private CommandService _commands;
         private IServiceProvider _services;
-        public static List<CannedResponse> _cannedResponses;
+        public static List<CannedResponse> cannedResponses;
 
         private BotConfig botConfig;
 
         // Kick off the bot
         public async Task RunBot()
         {
-            _client = new DiscordSocketClient(); // Define _client
+            client = new DiscordSocketClient(); // Define _client
             _commands = new CommandService(); // Define _commands
             _services = new ServiceCollection() // Define _services
-                .AddSingleton(_client)
+                .AddSingleton(client)
                 .AddSingleton(_commands)
                 .BuildServiceProvider();
             //_cannedResponses = new List<CannedResponse>();
 
-            _client.Log += Log; // Logging
+            client.Log += Log; // Logging
 
             await ReadConfigJson("Config.json"); // Pull in the general config
             await ReadCannedTextJson("CannedResponses.json"); // Pull in the canned response config
-            // TODO: scan through the config and perform channel name -> mention replacements
 
             string botToken = botConfig.Token; // Make a string for the token
             if (string.IsNullOrWhiteSpace(botToken))
@@ -48,9 +48,9 @@ namespace Scamp
             }
 
             await RegisterCommandsAsync();
-            await _client.LoginAsync(TokenType.Bot, botToken); // Log into the bot user
-            await _client.StartAsync(); // Start the bot user
-            await _client.SetGameAsync(botConfig.Game); // Set the game the bot is playing
+            await client.LoginAsync(TokenType.Bot, botToken); // Log into the bot user
+            await client.StartAsync(); // Start the bot user
+            await client.SetGameAsync(botConfig.Game); // Set the game the bot is playing
             await Task.Delay(-1); // Delay for -1 to keep the console window opened
         }
 
@@ -82,7 +82,7 @@ namespace Scamp
             {
                 _ = Log(new LogMessage(LogSeverity.Warning, ToString(), "No canned response config file exists! Creating."));
 
-                _cannedResponses = new List<CannedResponse>()
+                cannedResponses = new List<CannedResponse>()
                 {
                     new CannedResponse
                     {
@@ -96,18 +96,27 @@ namespace Scamp
                         ContributorOnly = false
                     }
                 };
-                File.WriteAllText(cannedResponseFileName, JsonConvert.SerializeObject(_cannedResponses, Formatting.Indented));
+                File.WriteAllText(cannedResponseFileName, JsonConvert.SerializeObject(cannedResponses, Formatting.Indented));
             }
             else
             {
-                _cannedResponses = JsonConvert.DeserializeObject<List<CannedResponse>>(File.ReadAllText(cannedResponseFileName));
+                cannedResponses = JsonConvert.DeserializeObject<List<CannedResponse>>(File.ReadAllText(cannedResponseFileName));
                 await Log(new LogMessage(LogSeverity.Info, this.ToString(), "Canned response config file found and deserialized."));
             }
         }
 
+        public async Task ReloadAppAsync()
+        {
+            botConfig = default(BotConfig);
+            await ReadConfigJson("Config.json");
+
+            cannedResponses = default(List<CannedResponse>);
+            await ReadCannedTextJson("CannedResponses.json");
+        }
+
         private async Task RegisterCommandsAsync()
         {
-            _client.MessageReceived += HandleCommandAsync; // hook up MessageReceived to the command handler
+            client.MessageReceived += HandleCommandAsync; // hook up MessageReceived to the command handler
 
             // Here we discover all of the command modules in the entry assembly and load them. Starting from Discord.NET 2.0, a
             // service provider is required to be passed into the module registration method to inject the 
@@ -148,12 +157,12 @@ namespace Scamp
 
             // React to pings and the command prefix
             if (message.HasStringPrefix(botConfig.Prefix, ref argumentPos)
-                || message.HasMentionPrefix(_client.CurrentUser, ref argumentPos))
+                || message.HasMentionPrefix(client.CurrentUser, ref argumentPos))
             {
                 _ = Log(new LogMessage(LogSeverity.Info, ToString(), $"Message from user {message.Author} looks like a bot invocation."));
 
                 // Create a WebSocket-based command context based on the message
-                var context = new SocketCommandContext(_client, message);
+                var context = new SocketCommandContext(client, message);
 
                 // Execute the command with the command context we just created, along with the service provider for precondition checks.
                 var result = await _commands.ExecuteAsync(
@@ -165,7 +174,7 @@ namespace Scamp
                 if (!result.IsSuccess)
                 {
                     Console.WriteLine(result.ErrorReason);
-                    await message.Channel.SendMessageAsync($"Something went wrong:\n```\n{result.ErrorReason}\n```\nI just want to bang on my drum.");
+                    await message.Channel.SendMessageAsync($"Something went wrong. I just want to bang on my drum.\n```{result.ErrorReason}```");
                 }
                 else
                 {

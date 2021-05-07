@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
+using Discord;
 
 namespace Scamp
 {
@@ -12,7 +13,7 @@ namespace Scamp
         [Command("ping")]
         private async Task Ping()
         {
-            await ReplyAsync("Pong! 🏓 " + Program._client.Latency + "ms");
+            await ReplyAsync("Pong! 🏓 " + Program.client.Latency + "ms");
         }
 
         [Command("text")]
@@ -29,7 +30,7 @@ namespace Scamp
             }
 
             // Grab a list of the responses with matching trigger keywords; we'll call them all.
-            List<CannedResponse> matchingRawResponses = Program._cannedResponses
+            List<CannedResponse> matchingRawResponses = Program.cannedResponses
                 .Where(cr => cr.Aliases.Count(a => a.ToString() == key) > 0)
                 .ToList();
 
@@ -49,9 +50,21 @@ namespace Scamp
         }
     }
 
-    /// <summary>
+    [RequireUserPermission(GuildPermission.Administrator)]
+    [Group("admin")]
+    public class AdminModule : ModuleBase<SocketCommandContext>
+    {
+        [Command("reload")]
+        [Summary("Kills the bot to update the bot config.")]
+        [Alias("reboot", "refresh")]
+        public async Task Reload()
+        {
+            await ReplyAsync($"Fare thee well, {Context.User.Username}.");
+            Environment.Exit(exitCode: 0);
+        }
+    }
+
     /// Example and test commands
-    /// </summary>
 
     // Test module with no prefix
     public class InfoModule : ModuleBase<SocketCommandContext>
