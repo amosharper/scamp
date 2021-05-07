@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace Scamp
 {
@@ -102,6 +103,25 @@ namespace Scamp
             {
                 cannedResponses = JsonConvert.DeserializeObject<List<CannedResponse>>(File.ReadAllText(cannedResponseFileName));
                 await Log(new LogMessage(LogSeverity.Info, this.ToString(), "Canned response config file found and deserialized."));
+
+                foreach (var response in cannedResponses)
+                {
+                    // Split the existing alias list by those that do and don't contain wildcards
+                    var triggerAliases = response.Aliases.Where(a => a.Contains("*"));
+                    var commandAliases = response.Aliases.Where(a => !a.Contains("*"));
+                    var triggerRegexes = new List<Regex>();
+
+                    foreach (var triggerString in triggerAliases)
+                    {
+                        var regexPreString = triggerString.Replace("*", "(.*)");
+                        var regexString = $@"{regexPreString}";
+                        triggerRegexes.Add(new Regex(regexString, RegexOptions.IgnoreCase | RegexOptions.Multiline));
+                    }
+
+                    // Update the canned response object with the two new lists
+                    response.Aliases = commandAliases;
+                    response.RegExTriggers = triggerRegexes;
+                };
             }
         }
 
@@ -183,20 +203,10 @@ namespace Scamp
             }
             else
             {
-                // Look for canned response whole-message triggers or partial message triggers
+                // check the text against any canned response's wildcard trigger aliases
                 foreach (var trigger in cannedResponses)
                 {
-                    if (
-                        (trigger.WholeMessageTrigger && trigger.Aliases.Where( a =>
-                            message.Content.ToLowerInvariant()
-                            .Equals(a.ToLowerInvariant()))
-                        .Count() > 0
-                        ) || (
-                        trigger.PartialMessageTrigger && trigger.Aliases.Where(a =>
-                            message.Content.ToLowerInvariant()
-                            .Contains(a.ToLowerInvariant()))
-                        .Count() > 0
-                        ))
+                    if (trigger.RegExTriggers.Where(r => r.IsMatch(message.Content)).Count() > 0)
                     {
                         await message.Channel.SendMessageAsync(trigger.CannedResponseText);
                     }

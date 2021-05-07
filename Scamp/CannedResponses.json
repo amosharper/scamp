@@ -2,50 +2,41 @@
   {
     "Aliases": [ "faq", "faqs" ],
     "CannedResponseText": "_Study the FAQ, lest ye be studied._\n_Seek there thine answers, lest ye be sought._\n_By thy will, cleanse thyself of nescience._\n{#frequently_asked_questions}",
-    "TeamOnly": false,
-    "WholeMessageTrigger": false,
-    "PartialMessageTrigger": false
+    "TeamOnly": false
   },
   {
     "Aliases": [ "lost" ],
     "CannedResponseText": "You look lost, pilgrim. You've wandered into the **Skywind** server, a total conversion using the Skyrim Special Edition engine to bring Morrowind into the modern day.\n\nIf you were looking for something different, maybe you clicked the wrong link; go back and try again (or stay if you like - you're welcome!). If you want to know more about Skywind, check out our {#frequently_asked_questions}.",
-    "TeamOnly": false,
-    "WholeMessageTrigger": false,
-    "PartialMessageTrigger": false
+    "TeamOnly": false
   },
   {
     "Aliases": [ "ms", "microsoft", "zenimax", "acquisition" ],
     "CannedResponseText": "We don’t anticipate that Microsoft’s acquisition of ZeniMax will change anything for Skywind. Microsoft have a history of being hands-off with their studios and mods for their games. We’ll continue to respect the guidelines that have been laid out, and if we do hear anything, we’ll keep everyone updated.",
-    "TeamOnly": false,
-    "WholeMessageTrigger": false,
-    "PartialMessageTrigger": false
+    "TeamOnly": false
   },
   {
     "Aliases": [ "testrandom", "random" ],
     "CannedResponseText": "Your random word is '{random:water;barley malt;hops}'.",
-    "TeamOnly": false,
-    "WholeMessageTrigger": false,
-    "PartialMessageTrigger": false
+    "TeamOnly": false
   },
   {
     "Aliases": [ "testchannel", "channel" ],
     "CannedResponseText": "Here's a casual mention of {channel:bot_sandbox}. Hope it works. Here's a fake one: {channel:bleurgh}.",
-    "TeamOnly": false,
-    "WholeMessageTrigger": false,
-    "PartialMessageTrigger": false
+    "TeamOnly": false
   },
   {
-    "Aliases": [ "he'll save children", "hell save children" ],
+    "Aliases": [ "*he'll save children*", "*hell save children*" ],
     "CannedResponseText": "but not the elvish children",
-    "TeamOnly": false,
-    "WholeMessageTrigger": false,
-    "PartialMessageTrigger": true
+    "TeamOnly": false
   },
   {
     "Aliases": [ "beep" ],
     "CannedResponseText": "beep-beep-boop",
-    "TeamOnly": false,
-    "WholeMessageTrigger": true,
-    "PartialMessageTrigger": false
+    "TeamOnly": false
+  },
+  {
+    "Aliases": [ "boop*" ],
+    "CannedResponseText": "beep-beep-boop",
+    "TeamOnly": false
   }
 ]
