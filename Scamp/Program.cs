@@ -181,8 +181,27 @@ namespace Scamp
                     _ = Log(new LogMessage(LogSeverity.Info, ToString(), $"Command processed successfully."));
                 }
             }
-
-            // TODO: Look for autoresponse text
+            else
+            {
+                // Look for canned response whole-message triggers or partial message triggers
+                foreach (var trigger in cannedResponses)
+                {
+                    if (
+                        (trigger.WholeMessageTrigger && trigger.Aliases.Where( a =>
+                            message.Content.ToLowerInvariant()
+                            .Equals(a.ToLowerInvariant()))
+                        .Count() > 0
+                        ) || (
+                        trigger.PartialMessageTrigger && trigger.Aliases.Where(a =>
+                            message.Content.ToLowerInvariant()
+                            .Contains(a.ToLowerInvariant()))
+                        .Count() > 0
+                        ))
+                    {
+                        await message.Channel.SendMessageAsync(trigger.CannedResponseText);
+                    }
+                }
+            }
         }
     }
 }
